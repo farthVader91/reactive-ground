@@ -5,7 +5,6 @@ import akka.actor.ActorSystem;
 import akka.event.Logging;
 import akka.http.javadsl.Http;
 import akka.http.javadsl.model.HttpRequest;
-import akka.japi.Pair;
 import akka.stream.Attributes;
 import akka.stream.ClosedShape;
 import akka.stream.OverflowStrategy;
@@ -34,23 +33,24 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class Crawler {
-  public static final String seedUrl = "https://en.wikipedia.org/wiki/Main_Page";
-  private static ActorSystem actorSystem = ActorSystem.create();
-  private static Http http = Http.get(actorSystem);
-  private static Pattern hrefP = Pattern.compile("href=\"(.*?)\"");
+
+  public static final String SEED_URL = "https://en.wikipedia.org/wiki/Main_Page";
+  private static final ActorSystem ACTOR_SYSTEM = ActorSystem.create();
+  private static final Http HTTP = Http.get(ACTOR_SYSTEM);
+  private static final Pattern HREF_P = Pattern.compile("href=\"(.*?)\"");
 
   public static void main(String[] args) {
-    RunnableGraph<NotUsed> runnableGraph = crawlerWithSeed(new CrawlSpec(seedUrl, 1L));
+    RunnableGraph<NotUsed> runnableGraph = crawlerWithSeed(new CrawlSpec(SEED_URL, 1L));
 
     runnableGraph.withAttributes(Attributes.createLogLevels(Logging.InfoLevel()))
-        .run(actorSystem);
+        .run(ACTOR_SYSTEM);
   }
 
 
   private static CompletionStage<String> processUrl(String url) {
     try {
-      return http.singleRequest(HttpRequest.create().withUri(url))
-          .thenCompose(resp -> resp.entity().toStrict(1024, actorSystem))
+      return HTTP.singleRequest(HttpRequest.create().withUri(url))
+          .thenCompose(resp -> resp.entity().toStrict(1024, ACTOR_SYSTEM))
           .thenApply(resp -> resp.getData().utf8String())
           .exceptionally(err -> "");
     } catch (RuntimeException re) {
@@ -62,12 +62,9 @@ public class Crawler {
   private static RunnableGraph<NotUsed> crawlerWithSeed(CrawlSpec seed) {
     Source<CrawlSpec, NotUsed> seedSrc = Source.single(seed);
     Flow<CrawlSpec, PageDescriptor, NotUsed> procFlo = Flow.of(CrawlSpec.class)
-        .zipWithIndex()
-        .map(Pair::first)
         .throttle(1, Duration.ofMillis(100))
         .statefulMapConcat(() -> {
           Set<String> processed = new HashSet<>();
-
           return cs -> {
             if (processed.contains(cs.getUrl())) {
               return Collections.emptyList();
@@ -82,7 +79,7 @@ public class Crawler {
                 .uri(cspec.getUrl())
                 .depth(cspec.getDepth())
                 .body(body)
-                .refs(hrefP.matcher(body)
+                .refs(HREF_P.matcher(body)
                     .results()
                     .map(mr -> mr.group(1))
                     .filter(href -> href.startsWith("http"))
@@ -100,13 +97,12 @@ public class Crawler {
           UniformFanInShape<CrawlSpec, CrawlSpec> fanin = b.add(Concat.create());
           UniformFanOutShape<PageDescriptor, PageDescriptor> bcast = b.add(Broadcast.create(2));
 
-          b.from(b.add(seedSrc)).toFanIn(fanin);
-
-          b.from(fanin)
+          b.from(b.add(seedSrc))
+              .viaFanIn(fanin)
               .via(b.add(procFlo))
-              .toFanOut(bcast);
+              .viaFanOut(bcast)
+              .to(b.add(pageSink));
 
-          b.from(bcast).to(b.add(pageSink));
           b.from(bcast)
               .via(
                   b.add(Flow.of(PageDescriptor.class)
