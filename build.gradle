@@ -17,21 +17,15 @@ repositories {
 
 dependencies {
     implementation platform("com.typesafe.akka:akka-http-bom_${versions.ScalaBinary}:10.2.9")
-
-    implementation 'io.projectreactor:reactor-core:3.4.14'
-    implementation 'ch.qos.logback:logback-classic:1.2.10'
-
     implementation platform("com.typesafe.akka:akka-bom_${versions.ScalaBinary}:2.6.18")
-//    implementation "com.typesafe.akka:akka-actor_${versions.ScalaBinary}"
     implementation "com.typesafe.akka:akka-actor-typed_${versions.ScalaBinary}:${versions.AkkaVersion}"
     implementation "com.typesafe.akka:akka-stream_${versions.ScalaBinary}:${versions.AkkaVersion}"
     implementation "com.typesafe.akka:akka-http_${versions.ScalaBinary}"
-    implementation "com.lightbend.akka:akka-stream-alpakka-file_${versions.ScalaBinary}:3.0.4"
     implementation "com.typesafe.akka:akka-slf4j_${versions.ScalaBinary}"
+    implementation "ch.qos.logback:logback-classic:1.2.11"
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
-    testImplementation 'io.projectreactor:reactor-test:3.4.14'
 }
 
 test {
