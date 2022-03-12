@@ -1,0 +1,75 @@
+digraph src_comp {
+    rankdir ="LR"
+    fontname="Courier New,Helvetica"
+    node [shape=box fontname="Courier New,Helvetica,Comic Sans MS"]
+    edge [arrowsize=.75 fontsize=12 fontname="Helvetica,Comic Sans MS" fontstyle=bold]
+
+    // comp_src_begin
+    subgraph cluster_cs1 {
+        style="filled,rounded"
+        fillcolor=lightblue1
+        label="Source"
+
+        subgraph cluster_cs1_s {
+            style="filled,rounded"
+            fillcolor=lightblue1
+            label="Source"
+            cs1_s_gen [label="range(0,5)" color="lightblue" style=filled]
+        }
+
+        cs1_s_gen -> cs1_m_oin [label="..  3,  2,  1,  0"]
+
+        subgraph cluster_cs1_m {
+            label="map"
+            labeljust="l"
+            style="filled,rounded"
+            fillcolor=lightblue3
+
+            cs1_m_oin [label="" shape=point]
+            cs1_m_oout [label="" shape=point]
+            cs1_m_udf [label="λ = squares" fillcolor=lightgoldenrod style=filled]
+
+            cs1_m_oin -> cs1_m_udf [label=x style=dashed arrowhead=empty arrowsize=0.5]
+            cs1_m_udf -> cs1_m_oout [label="x²" style=dashed arrowhead=empty arrowsize=0.5]
+        }
+    }
+
+    cs1_op [style=invis]
+    cs1_m_oout -> cs1_op [label="..  9,  4,  1,  0"]
+    // comp_src_end
+
+    // comp_src_begin
+    subgraph cluster_cs2 {
+        style="filled,rounded"
+        fillcolor=lightblue1
+        label="Source"
+
+        subgraph cluster_cs2_s {
+            style="filled,rounded"
+            fillcolor=lightblue1
+            label="Source"
+            cs2_s_gen [label="range(0,5)" color="lightblue" style=filled]
+        }
+
+        cs2_s_gen -> cs2_m_oin [label="..  3,  2,  1,  0"]
+
+        subgraph cluster_cs2_m {
+            label="filter"
+            labeljust="l"
+            style="filled,rounded"
+            fillcolor=lightblue3
+
+            cs2_m_oin [label="" shape=point]
+            cs2_m_oout [label="" shape=point]
+            cs2_m_udf [label="λ = is_even" fillcolor=lightgoldenrod style=filled]
+
+            cs2_m_oin -> cs2_m_udf [label=x style=dashed arrowhead=empty arrowsize=0.5]
+            cs2_m_udf -> cs2_m_oout [label="T/F" style=dashed arrowhead=empty arrowsize=0.5]
+        }
+    }
+
+    cs2_op [style=invis]
+    cs2_m_oout -> cs2_op [label="..  4,  2,  0"]
+    // comp_src_end
+
+}

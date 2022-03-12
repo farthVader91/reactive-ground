@@ -1,0 +1,50 @@
+digraph op_concat {
+    rankdir ="LR"
+    fontname="Courier New,Helvetica"
+    compound=true
+    // splines=curved
+    node [shape=box fontname="Courier New,Helvetica,Comic Sans MS"]
+    edge [arrowsize=.75 fontsize=12 fontname="Helvetica,Comic Sans MS" fontstyle=bold]
+
+    // map begin
+
+    subgraph cluster_source_1 {
+        style="filled,rounded"
+        fillcolor=lightblue1
+        label="Source"
+        s1_gen [label="of x's" color="lightblue" style=filled]
+    }
+
+    // dm_udf -> s1_gen:w [style=dashed arrowhead=none arrowsize=0.5 lhead=cluster_source_1]
+    // s1_gen:e -> dm_fout [style=dashed arrowhead=empty arrowsize=0.5 ltail=cluster_source_1]
+
+    subgraph cluster_source_2 {
+        style="filled,rounded"
+        fillcolor=lightblue1
+        label="Source"
+        s2_gen [label="of x's" color="lightblue" style=filled]
+    }
+
+    // dm_udf -> s2_gen:e [style=dashed arrowhead=none arrowsize=0.5 lhead=cluster_source_2]
+    // s2_gen:w -> dm_fout [style=dashed arrowhead=empty arrowsize=0.5 ltail=cluster_source_2]
+
+    subgraph cluster_concat {
+        label="concat"
+        labeljust="l"
+        style="filled,rounded"
+        fillcolor=lightblue3
+
+        dm_fin [label="" shape=point]
+        dm_fout [label="" shape=point]
+
+        dm_fin -> dm_fout [label=x style=dashed arrowhead=empty arrowsize=0.5]
+    }
+
+    s1_gen:e -> dm_fin [arrowsize=0.5 ltail=cluster_source_1]
+    s2_gen:e -> dm_fin [arrowsize=0.5 ltail=cluster_source_2]
+
+    dm_op [style=invis]
+    dm_fout -> dm_op [label="..  s2x2,  s2x1,  s1x3,  s1x2,  s1x1"]
+    // map end
+
+}

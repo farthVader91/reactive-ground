@@ -1,0 +1,29 @@
+digraph op_filter {
+    rankdir ="LR"
+    fontname="Courier New,Helvetica"
+    node [shape=box fontname="Courier New,Helvetica,Comic Sans MS"]
+    edge [arrowsize=.75 fontsize=12 fontname="Helvetica,Comic Sans MS" fontstyle=bold]
+
+    // filter begin
+    dm_ip [style=invis]
+    dm_ip -> dm_fin [label="..  x3,  x2,  x1"]
+
+    subgraph cluster_filter {
+        label="filter"
+        labeljust="l"
+        style="filled,rounded"
+        fillcolor=lightblue3
+
+        dm_fin [label="" shape=point]
+        dm_fout [label="" shape=point]
+        dm_udf [label="λ" fillcolor=lightgoldenrod style=filled]
+
+        dm_fin -> dm_udf [label=x style=dashed arrowhead=empty arrowsize=0.5]
+        dm_udf -> dm_fout [label="T/F" style=dashed arrowhead=empty arrowsize=0.5]
+    }
+
+    dm_op [style=invis]
+    dm_fout -> dm_op [label=".. x3, x1"]
+    // filter end
+
+}

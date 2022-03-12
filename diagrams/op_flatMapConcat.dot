@@ -1,0 +1,39 @@
+digraph op_flatMapConcat {
+    rankdir ="LR"
+    fontname="Courier New,Helvetica"
+    compound=true
+    node [shape=box fontname="Courier New,Helvetica,Comic Sans MS"]
+    edge [arrowsize=.75 fontsize=12 fontname="Helvetica,Comic Sans MS" fontstyle=bold]
+
+    // map begin
+    dm_ip [style=invis]
+    dm_ip -> dm_fin [label="..  x3,  x2,  x1"]
+
+    subgraph cluster_mapConcat {
+        label="flatMapConcat"
+        labeljust="l"
+        style="filled,rounded"
+        fillcolor=lightblue3
+
+        dm_fin [label="" shape=point]
+        dm_fout [label="" shape=point]
+        dm_udf [label="λ" fillcolor=lightgoldenrod style=filled]
+
+        dm_fin -> dm_udf [label=x style=dashed arrowhead=empty arrowsize=0.5]
+
+        subgraph cluster_source {
+            style="filled,rounded"
+            fillcolor=lightblue1
+            label="Source"
+            s_gen [label="of y's" color="lightblue" style=filled]
+        }
+
+        dm_udf -> s_gen [style=dashed arrowhead=none arrowsize=0.5 lhead=cluster_source]
+        s_gen -> dm_fout [style=dashed arrowhead=empty arrowsize=0.5 ltail=cluster_source]
+    }
+
+    dm_op [style=invis]
+    dm_fout -> dm_op [label="..  x2y3,  x2y2 ,  x2y1,  x1y2,  x1y1"]
+    // map end
+
+}

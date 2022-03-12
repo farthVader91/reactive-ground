@@ -1,0 +1,19 @@
+digraph src_range {
+    rankdir ="LR"
+    fontname="Courier New,Helvetica"
+    node [shape=box fontname="Courier New,Helvetica,Comic Sans MS"]
+    edge [arrowsize=.75 fontsize=12 fontname="Helvetica,Comic Sans MS" fontstyle=bold]
+
+    // src begin
+    subgraph cluster_source {
+        style="filled,rounded"
+        fillcolor=lightblue1
+        label="Source"
+        s_gen [label="range(0,5)" color="lightblue" style=filled]
+    }
+
+    s_out [style="invis"]
+    s_gen -> s_out [label="..  3,  2,  1,  0"]
+    // src end
+
+}

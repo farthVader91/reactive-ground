@@ -1,0 +1,98 @@
+digraph src_comp {
+    rankdir ="LR"
+    fontname="Courier New,Helvetica"
+    compound=true
+    node [shape=box fontname="Courier New,Helvetica,Comic Sans MS"]
+    edge [arrowsize=.75 fontsize=12 fontname="Helvetica,Comic Sans MS" fontstyle=bold]
+
+    subgraph cluster_dls {
+        style="filled,rounded"
+        fillcolor=lightblue1
+        label="Source"
+
+        dls_gen [label="Directory.ls(input_dir)" color="lightblue" style=filled]
+    }
+
+    subgraph cluster_dls_filter {
+        style="filled,rounded"
+        fillcolor=lightblue3
+        label="filter"
+        labeljust="l"
+
+        dls_filter_in [shape=point]
+        dls_filter_lambda [label="λ = is_file && is_created_change" fillcolor=lightgoldenrod style=filled]
+        dls_filter_out [shape=point]
+
+        dls_filter_in -> dls_filter_lambda [label="(Path, Change)" style=dashed arrowhead=empty arrowsize=0.5]
+        dls_filter_lambda -> dls_filter_out [label="T/F" style=dashed arrowhead=empty arrowsize=0.5]
+    }
+
+    dls_gen -> dls_filter_in [label="(Path, Change)"]
+
+    subgraph cluster_dls_map {
+        style="filled,rounded"
+        fillcolor=lightblue3
+        label="map"
+        labeljust="l"
+
+        dls_map_in [shape=point]
+        dls_map_lambda [label="λ = Pair::first" fillcolor=lightgoldenrod style=filled]
+        dls_map_out [shape=point]
+
+        dls_map_in -> dls_map_lambda [label="(Path, Change)" style=dashed arrowhead=empty arrowsize=0.5]
+        dls_map_lambda -> dls_map_out [label="Path" style=dashed arrowhead=empty arrowsize=0.5]
+    }
+
+    dls_filter_out -> dls_map_in [label="(Path, Change)"]
+
+
+    subgraph cluster_flatMapConcat {
+        label="flatMapConcat"
+        labeljust="l"
+        style="filled,rounded"
+        fillcolor=lightblue3
+
+        fmc_in [shape=point]
+        fmc_out [shape=point]
+        fmc_udf [label="λ = FileTailSource" fillcolor=lightgoldenrod style=filled]
+
+        fmc_in -> fmc_udf [label="Path" style=dashed arrowhead=empty arrowsize=0.5]
+
+        subgraph cluster_lineSource {
+            style="filled,rounded"
+            fillcolor=lightblue1
+            label="Source"
+            ls_gen [label="FileTailSource(path)" color="lightblue" style=filled]
+        }
+
+        fmc_udf -> ls_gen [style=dashed arrowhead=none arrowsize=0.5 lhead=cluster_source]
+        ls_gen
+
+        subgraph cluster_dirSource {
+            style="filled,rounded"
+            fillcolor=lightblue1
+            label="Source"
+            ds_gen [label="DirectoryChangesSource(path)" color="lightblue" style=filled]
+        }
+
+        subgraph cluster_mergeOp {
+            style="filled,rounded"
+            fillcolor=lightblue3
+            label="mergePreferred"
+            labeljust=l
+
+            mpf_in [shape=point]
+            mpf_out [shape=point]
+            mpf_in -> mpf_out [label="Path" style=dashed arrowhead=empty arrowsize=0.5]
+        }
+
+
+        ds_gen:e -> mpf_in [ltail=cluster_dirSource]
+        ls_gen:e -> mpf_in [ltail=cluster_lineSource]
+
+        mpf_out -> fmc_out [style=dashed arrowhead=empty arrowsize=0.5 ltail=cluster_source]
+    }
+
+    dls_map_out -> fmc_in [label="Path"]
+
+}
